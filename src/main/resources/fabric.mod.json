@@ -21,7 +21,7 @@
     "mtrsurveyor.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
+    "fabricloader": ">=0.16",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
 
