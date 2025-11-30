@@ -10,12 +10,14 @@ This enables mods utilizing **Surveyor** (e.g. Hoofprint) to display such landma
 The config file is located under `.minecraft/config/mtrsurveyor.json`.
 
 ## Commands
-- `/mtrsurveyor reload` - Reload the config from `.minecraft/config/mtrsurveyor.json`.
-- `/mtrsurveyor clear <world id>` - Clear all landmarks for the specified world (Note: Landmarks will appear again when MTR stations/depots changed, disable automatic sync in config if that's not desired)
-- `/mtrsurveyor sync <world id>` - Sync & update all landmarks for the specified world
-
-## Known-issue
-Existing landmarks are not updated when a change occurs.
+- `/mtrsurveyor config addDepotLandmarks (false/true)` - Query or set whether depot landmarks should be added to the map.
+- `/mtrsurveyor config addStationLandmarks (false/true)` - Query or set whether station landmarks should be added to the map.
+- `/mtrsurveyor config autoSync (false/true)` - Query or set whether landmarks should be automatically created & synced when an MTR-related change occurs.
+- `/mtrsurveyor config reload` - Reload the config from `.minecraft/config/mtrsurveyor.json`.
+- `/mtrsurveyor config showHiddenRoute (false/true)` - Query or set whether hidden routes in MTR should be appended to the station description.
+- `/mtrsurveyor config showStationWithNoRoute (false/true)` - Query or set whether empty stations (i.e. with no routes) should be added to the map.
+- `/mtrsurveyor clearLandmarks <world id>` - Clear all landmarks for the specified world (Note: Landmarks will appear again when MTR stations/depots changed if auto sync is enabled, see above to disable)
+- `/mtrsurveyor syncLandmarks <world id>` - Sync & update all landmarks for the specified world
 
 ## License
 This project is licensed under the MIT License.
