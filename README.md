@@ -6,6 +6,15 @@ This enables mods utilizing **Surveyor** (e.g. Hoofprint) to display such landma
 
 ![A Minecraft map displayed in Hoofprint, a minecraft map mod, along with MTR stations/depots landmarks/markers](./assets/preview.png)
 
+## Sinytra Connector Compatibility
+![A fox emoji saying yes!](./assets/sinytra_yes.png)
+
+This should work with **Sinytra Connector** on Forge/NeoForge, provided you have the following mods installed:
+- Sinytra Connector
+- Forgified Fabric API / FFAPI
+- Minecraft Transit Railway 4.x (Forge)
+- - Note: No need to run the Fabric version of MTR via connector, just use the Forge build!
+
 ## Config
 The config file is located under `.minecraft/config/mtrsurveyor.json`.
 
