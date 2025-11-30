@@ -4,10 +4,10 @@
   "version": "${version}",
   "name": "MTR: Surveyor Integration",
   "description": "MTR Station & Depot Landmarks for the Surveyor Map Framework.",
-  "authors": ["LX86"],
+  "authors": ["AmberFrost"],
   "contact": {
-    "sources": "https://github.com/Kenny-Hui/mtrsurveyor",
-    "issues": "https://github.com/Kenny-Hui/mtrsurveyor/issues"
+    "sources": "https://github.com/AmberIsFrozen/mtrsurveyor",
+    "issues": "https://github.com/AmberIsFrozen/mtrsurveyor/issues"
   },
   "license": "MIT",
   "icon": "assets/mtrsurveyor/icon.png",
