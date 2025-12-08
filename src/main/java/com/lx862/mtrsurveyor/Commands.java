@@ -1,6 +1,6 @@
 package com.lx862.mtrsurveyor;
 
-import com.lx862.mtrsurveyor.landmark.LandmarkManager;
+import com.lx862.mtrsurveyor.landmark.MTRLandmarkManager;
 import com.lx862.mtrsurveyor.mixin.MTRAccessorMixin;
 import com.lx862.mtrsurveyor.mixin.MainAccessorMixin;
 import com.mojang.brigadier.CommandDispatcher;
@@ -32,7 +32,7 @@ public class Commands {
         clearNode.then(CommandManager.argument("dimension", DimensionArgumentType.dimension())
             .executes(ctx -> {
                     World world = DimensionArgumentType.getDimensionArgument(ctx, "dimension");
-                    LandmarkManager.clearLandmarks(world);
+                    MTRLandmarkManager.clearLandmarks(world);
                     ctx.getSource().sendFeedback(() -> Text.literal("Cleared all MTR Surveyor landmarks!").formatted(Formatting.GREEN), true);
 
                     if(Config.getInstance().enableAutoSync) {
@@ -63,7 +63,7 @@ public class Commands {
                         boolean isOurWorld = simulator.dimension.equals(worldId.toString().replace(":", "/"));
                         if(isOurWorld) {
                             MTRDataSummary mtrDataSummary = new MTRDataSummary(simulator);
-                            LandmarkManager.syncLandmarks(world, mtrDataSummary);
+                            MTRLandmarkManager.syncLandmarks(world, mtrDataSummary);
                             ctx.getSource().sendFeedback(() -> Text.literal("Synced MTR landmarks for world " + worldId + "!").formatted(Formatting.GREEN), true);
                         }
                     }
@@ -77,7 +77,7 @@ public class Commands {
         LiteralArgumentBuilder<ServerCommandSource> reloadNode = CommandManager.literal("reload");
         reloadNode.executes(ctx -> {
            Config.load();
-           ctx.getSource().sendFeedback(() -> Text.literal("Config reloaded!"), false);
+           ctx.getSource().sendFeedback(() -> Text.literal("Config reloaded!"), true);
            return 1;
         });
 
@@ -123,7 +123,7 @@ public class Commands {
 
     private static void saveConfig(Config configInstance, CommandContext<ServerCommandSource> ctx, Text successMessage) {
         try {
-            ctx.getSource().sendFeedback(() -> successMessage, false);
+            ctx.getSource().sendFeedback(() -> successMessage, true);
             Config.write(configInstance);
         } catch (IOException e) {
             ctx.getSource().sendError(Text.literal("Failed to save config file!").formatted(Formatting.RED));

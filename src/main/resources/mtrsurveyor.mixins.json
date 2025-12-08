@@ -6,7 +6,7 @@
   "mixins": [
     "MainAccessorMixin",
     "MTRAccessorMixin",
-    "SimulatorMixin"
+    "MTRSimulatorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

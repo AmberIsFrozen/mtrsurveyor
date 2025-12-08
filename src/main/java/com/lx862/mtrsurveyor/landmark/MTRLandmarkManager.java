@@ -18,10 +18,9 @@ import org.mtr.core.data.*;
 import org.mtr.libraries.it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.mtr.mod.data.IGui;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class LandmarkManager {
+public class MTRLandmarkManager {
 
     public static void syncLandmarks(World world, MTRDataSummary dataSummary) {
         long startMs = System.currentTimeMillis();
@@ -31,6 +30,11 @@ public class LandmarkManager {
 
         MTRSurveyor.LOGGER.info("[{}] Syncing landmarks", MTRSurveyor.MOD_NAME);
         Long2ObjectOpenHashMap<AreaBase<?, ?>> mtrAreas = new Long2ObjectOpenHashMap<>();
+
+        Map<UUID, Map<Identifier, Landmark>> changed = landmarks.removeAllForBatch(new HashMap<>(), landmark -> {
+            Identifier landmarkId = landmark.id();
+            return landmarkId.getNamespace().equals(MTRSurveyor.MOD_ID);
+        });
 
         if(Config.getInstance().addStationLandmarks) {
             for(AreaBase<?, ?> area : new ArrayList<>(dataSummary.getData().stations)) {
@@ -48,19 +52,10 @@ public class LandmarkManager {
             if(shouldBeFilteredOut(area, dataSummary)) continue;
 
             Landmark landmark = createLandmark(area, dataSummary);
-            landmarks.put(world, landmark);
+            landmarks.putForBatch(changed, landmark);
         }
 
-        landmarks.removeAll(world, landmark -> {
-            Identifier landmarkId = landmark.id();
-            if(landmarkId.getNamespace().equals(MTRSurveyor.MOD_ID)) {
-                String areaIdStr = landmarkId.getPath().split("/")[1];
-                long id = Long.parseUnsignedLong(areaIdStr, 16);
-                return !mtrAreas.containsKey(id);
-            }
-
-            return false;
-        });
+        landmarks.handleChanged(world, changed, world.isClient(), null);
         MTRSurveyor.LOGGER.debug("[{}] Took {}ms to sync.", MTRSurveyor.MOD_NAME, (System.currentTimeMillis() - startMs));
     }
 
@@ -104,7 +99,6 @@ public class LandmarkManager {
 
             builder.add(LandmarkComponentTypes.NAME, Text.literal(IGui.formatStationName(station.getName())));
             builder.add(LandmarkComponentTypes.LORE, lores);
-            builder.add(MTRLandmarkComponentTypes.FARE_ZONE_1, station.getZone1());
             return builder;
         });
     }
@@ -122,7 +116,6 @@ public class LandmarkManager {
         builder.add(LandmarkComponentTypes.POS, new BlockPos((int)areaBase.getCenter().getX(), (int)areaBase.getCenter().getY(), (int)areaBase.getCenter().getZ()));
         builder.add(LandmarkComponentTypes.BOX, new BlockBox((int)areaBase.getMinX(), -64, (int)areaBase.getMinZ(), (int)areaBase.getMaxX(), 255, (int)areaBase.getMaxZ()));
         builder.add(LandmarkComponentTypes.STACK, Util.getItemStackForTransportMode(areaBase.getTransportMode(), areaBase instanceof Depot));
-        builder.add(MTRLandmarkComponentTypes.TRANSPORT_TYPE, areaBase.getTransportMode().toString());
     }
 
     private static boolean shouldBeFilteredOut(AreaBase<?, ?> areaBase, MTRDataSummary dataSummary) {

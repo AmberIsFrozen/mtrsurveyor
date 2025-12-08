@@ -4,6 +4,8 @@ This mod automatically adds stations & depots landmarks from [Minecraft Transit 
 
 This enables mods utilizing **Surveyor** (e.g. Hoofprint) to display such landmarks on the map.
 
+Required on **server-side**, installable on **client-side** icon for separate icons of Stations & Depot.
+
 ![A Minecraft map displayed in Hoofprint, a minecraft map mod, along with MTR stations/depots landmarks/markers](./assets/preview.png)
 
 ## Sinytra Connector Compatibility
