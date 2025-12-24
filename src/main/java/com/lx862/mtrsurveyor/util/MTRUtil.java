@@ -1,16 +1,10 @@
-package com.lx862.mtrsurveyor;
+package com.lx862.mtrsurveyor.util;
 
 import net.minecraft.item.ItemStack;
 import org.mtr.core.data.TransportMode;
 import org.mtr.mod.Items;
 
-import java.util.Locale;
-
-public class Util {
-    public static String getCamelCase(String s) {
-        return String.valueOf(s.charAt(0)).toUpperCase(Locale.ROOT) + s.substring(1).toLowerCase(Locale.ROOT);
-    }
-
+public class MTRUtil {
     public static ItemStack getItemStackForTransportMode(TransportMode transportMode, boolean isDepot) {
         final ItemStack stack;
         switch(transportMode) {

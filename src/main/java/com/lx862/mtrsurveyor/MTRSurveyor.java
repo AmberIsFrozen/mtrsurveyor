@@ -1,5 +1,6 @@
 package com.lx862.mtrsurveyor;
 
+import com.lx862.mtrsurveyor.config.MTRSurveyorConfig;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -19,7 +20,7 @@ public class MTRSurveyor implements ModInitializer {
     @Override
     public void onInitialize() {
         LOGGER.info("[{}] You get a landmark, you get a landmark, every-nyan gets a landmark! >w<", MOD_NAME);
-        Config.load();
+        MTRSurveyorConfig.init();
 
         ServerLifecycleEvents.SERVER_STARTING.register(minecraftServer -> {
             serverInstance = minecraftServer;

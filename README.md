@@ -18,7 +18,7 @@ This should work with **Sinytra Connector** on Forge/NeoForge, provided you have
 - - Note: No need to run the Fabric version of MTR via connector, just use the Forge build!
 
 ## Config
-The config file is located under `.minecraft/config/mtrsurveyor.json`.
+The config file is located under `.minecraft/config/mtrsurveyor.toml`.
 
 ## Commands
 - `/mtrsurveyor config addDepotLandmarks (false/true)` - Query or set whether depot landmarks should be added to the map.

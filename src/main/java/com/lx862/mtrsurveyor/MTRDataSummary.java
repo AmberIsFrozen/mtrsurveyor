@@ -1,5 +1,6 @@
 package com.lx862.mtrsurveyor;
 
+import com.lx862.mtrsurveyor.config.MTRSurveyorConfig;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import org.mtr.core.data.*;
 
@@ -29,7 +30,7 @@ public class MTRDataSummary {
             List<BasicRouteInfo> basicRouteInfos = new ArrayList<>();
             for(Route route : routePassing) {
                 BasicRouteInfo basicRouteInfo = new BasicRouteInfo(route.getName().split("\\|\\|")[0], route.getColor());
-                if(basicRouteInfos.contains(basicRouteInfo) || (!Config.getInstance().showHiddenRoute && route.getHidden())) continue;
+                if(basicRouteInfos.contains(basicRouteInfo) || (!MTRSurveyorConfig.INSTANCE.filter.showHiddenRoute.value() && route.getHidden())) continue;
                 basicRouteInfos.add(basicRouteInfo);
             }
 

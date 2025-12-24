@@ -1,7 +1,7 @@
 package com.lx862.mtrsurveyor.mixin;
 
-import com.lx862.mtrsurveyor.Config;
 import com.lx862.mtrsurveyor.MTRDataSummary;
+import com.lx862.mtrsurveyor.config.MTRSurveyorConfig;
 import com.lx862.mtrsurveyor.landmark.MTRLandmarkManager;
 import com.lx862.mtrsurveyor.MTRSurveyor;
 import net.minecraft.registry.RegistryKey;
@@ -22,7 +22,7 @@ public class MTRSimulatorMixin extends Data {
     @Override
     public void sync() {
         super.sync();
-        if(Config.getInstance().enableAutoSync) {
+        if(MTRSurveyorConfig.INSTANCE.enableAutoSync.value()) {
             // dimension is in format e.g. minecraft/overworld
             String[] dimSplit = dimension.split("/");
             String dimensionNamespace = dimSplit[0];

@@ -1,5 +1,6 @@
 package com.lx862.mtrsurveyor;
 
+import com.lx862.mtrsurveyor.config.MTRSurveyorConfig;
 import com.lx862.mtrsurveyor.landmark.MTRLandmarkManager;
 import com.lx862.mtrsurveyor.mixin.MTRAccessorMixin;
 import com.lx862.mtrsurveyor.mixin.MainAccessorMixin;
@@ -19,7 +20,6 @@ import net.minecraft.world.World;
 import org.mtr.core.Main;
 import org.mtr.core.simulation.Simulator;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -35,7 +35,7 @@ public class Commands {
                     MTRLandmarkManager.clearLandmarks(world);
                     ctx.getSource().sendFeedback(() -> Text.literal("Cleared all MTR Surveyor landmarks!").formatted(Formatting.GREEN), true);
 
-                    if(Config.getInstance().enableAutoSync) {
+                    if(MTRSurveyorConfig.INSTANCE.enableAutoSync.value()) {
                         final String disableSyncCommand = "/mtrsurveyor config autoSync false";
 
                         ctx.getSource().sendFeedback(() -> {
@@ -76,18 +76,18 @@ public class Commands {
 
         LiteralArgumentBuilder<ServerCommandSource> reloadNode = CommandManager.literal("reload");
         reloadNode.executes(ctx -> {
-           Config.load();
+//           Config.load();
            ctx.getSource().sendFeedback(() -> Text.literal("Config reloaded!"), true);
            return 1;
         });
 
 
 
-        LiteralArgumentBuilder<ServerCommandSource> autoSyncNode = createBoolConfigNode("autoSync", "Auto-sync landmarks", () -> Config.getInstance().enableAutoSync, (bl) -> Config.getInstance().enableAutoSync = bl);
-        LiteralArgumentBuilder<ServerCommandSource> showStationWithNoRouteNode = createBoolConfigNode("showStationWithNoRoute", "Show empty station (No route)", () -> Config.getInstance().showStationWithNoRoute, (bl) -> Config.getInstance().showStationWithNoRoute = bl);
-        LiteralArgumentBuilder<ServerCommandSource> showHiddenRouteNode = createBoolConfigNode("showHiddenRoute", "Show hidden route", () -> Config.getInstance().showHiddenRoute, (bl) -> Config.getInstance().showHiddenRoute = bl);
-        LiteralArgumentBuilder<ServerCommandSource> addStationLandmarks = createBoolConfigNode("addStationLandmarks", "Show station landmarks", () -> Config.getInstance().addStationLandmarks, (bl) -> Config.getInstance().addStationLandmarks = bl);
-        LiteralArgumentBuilder<ServerCommandSource> addDepotLandmarks = createBoolConfigNode("addDepotLandmarks", "Show depot landmarks", () -> Config.getInstance().addDepotLandmarks, (bl) -> Config.getInstance().addDepotLandmarks = bl);
+        LiteralArgumentBuilder<ServerCommandSource> autoSyncNode = createBoolConfigNode("autoSync", "Auto-sync landmarks", MTRSurveyorConfig.INSTANCE.enableAutoSync::value, MTRSurveyorConfig.INSTANCE.enableAutoSync::setValue);
+        LiteralArgumentBuilder<ServerCommandSource> showStationWithNoRouteNode = createBoolConfigNode("showStationWithNoRoute", "Show empty station (No route)", MTRSurveyorConfig.INSTANCE.filter.showStationWithNoRoute::value, MTRSurveyorConfig.INSTANCE.filter.showStationWithNoRoute::setValue);
+        LiteralArgumentBuilder<ServerCommandSource> showHiddenRouteNode = createBoolConfigNode("showHiddenRoute", "Show hidden route", MTRSurveyorConfig.INSTANCE.filter.showHiddenRoute::value, MTRSurveyorConfig.INSTANCE.filter.showHiddenRoute::setValue);
+        LiteralArgumentBuilder<ServerCommandSource> addStationLandmarks = createBoolConfigNode("addStationLandmarks", "Show station landmarks", MTRSurveyorConfig.INSTANCE.addStationLandmarks::value, MTRSurveyorConfig.INSTANCE.addStationLandmarks::setValue);
+        LiteralArgumentBuilder<ServerCommandSource> addDepotLandmarks = createBoolConfigNode("addDepotLandmarks", "Show depot landmarks", MTRSurveyorConfig.INSTANCE.addDepotLandmarks::value, MTRSurveyorConfig.INSTANCE.addDepotLandmarks::setValue);
 
         configNode.then(autoSyncNode);
         configNode.then(showStationWithNoRouteNode);
@@ -108,9 +108,8 @@ public class Commands {
         cfgNode.then(CommandManager.argument("enabled", BoolArgumentType.bool())
                 .executes(ctx -> {
                             boolean enabled = BoolArgumentType.getBool(ctx, "enabled");
-                            Config configInstance = Config.getInstance();
                             setValue.accept(enabled);
-                            saveConfig(configInstance, ctx, Text.literal(friendlyName + " set to " + enabled).formatted(Formatting.GREEN));
+                            saveConfig(MTRSurveyorConfig.INSTANCE, ctx, Text.literal(friendlyName + " set to " + enabled).formatted(Formatting.GREEN));
                             return 1;
                         }
                 ))
@@ -121,13 +120,8 @@ public class Commands {
         return cfgNode;
     }
 
-    private static void saveConfig(Config configInstance, CommandContext<ServerCommandSource> ctx, Text successMessage) {
-        try {
-            ctx.getSource().sendFeedback(() -> successMessage, true);
-            Config.write(configInstance);
-        } catch (IOException e) {
-            ctx.getSource().sendError(Text.literal("Failed to save config file!").formatted(Formatting.RED));
-            MTRSurveyor.LOGGER.error("Failed to save config for " + MTRSurveyor.MOD_ID + "!", e);
-        }
+    private static void saveConfig(MTRSurveyorConfig configInstance, CommandContext<ServerCommandSource> ctx, Text successMessage) {
+        ctx.getSource().sendFeedback(() -> successMessage, true);
+        configInstance.save();
     }
 }

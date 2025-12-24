@@ -1,9 +1,8 @@
 package com.lx862.mtrsurveyor.landmark;
 
-import com.lx862.mtrsurveyor.Config;
-import com.lx862.mtrsurveyor.MTRDataSummary;
-import com.lx862.mtrsurveyor.MTRSurveyor;
-import com.lx862.mtrsurveyor.Util;
+import com.lx862.mtrsurveyor.*;
+import com.lx862.mtrsurveyor.config.MTRSurveyorConfig;
+import com.lx862.mtrsurveyor.util.MTRUtil;
 import folk.sisby.surveyor.WorldSummary;
 import folk.sisby.surveyor.landmark.Landmark;
 import folk.sisby.surveyor.landmark.WorldLandmarks;
@@ -36,13 +35,13 @@ public class MTRLandmarkManager {
             return landmarkId.getNamespace().equals(MTRSurveyor.MOD_ID);
         });
 
-        if(Config.getInstance().addStationLandmarks) {
+        if(MTRSurveyorConfig.INSTANCE.addStationLandmarks.value()) {
             for(AreaBase<?, ?> area : new ArrayList<>(dataSummary.getData().stations)) {
                 mtrAreas.put(area.getId(), area);
             }
         }
 
-        if(Config.getInstance().addDepotLandmarks) {
+        if(MTRSurveyorConfig.INSTANCE.addDepotLandmarks.value()) {
             for(AreaBase<?, ?> area : new ArrayList<>(dataSummary.getData().depots)) {
                 mtrAreas.put(area.getId(), area);
             }
@@ -115,14 +114,13 @@ public class MTRLandmarkManager {
         builder.add(LandmarkComponentTypes.COLOR, areaBase.getColor());
         builder.add(LandmarkComponentTypes.POS, new BlockPos((int)areaBase.getCenter().getX(), (int)areaBase.getCenter().getY(), (int)areaBase.getCenter().getZ()));
         builder.add(LandmarkComponentTypes.BOX, new BlockBox((int)areaBase.getMinX(), -64, (int)areaBase.getMinZ(), (int)areaBase.getMaxX(), 255, (int)areaBase.getMaxZ()));
-        builder.add(LandmarkComponentTypes.STACK, Util.getItemStackForTransportMode(areaBase.getTransportMode(), areaBase instanceof Depot));
+        builder.add(LandmarkComponentTypes.STACK, MTRUtil.getItemStackForTransportMode(areaBase.getTransportMode(), areaBase instanceof Depot));
     }
 
     private static boolean shouldBeFilteredOut(AreaBase<?, ?> areaBase, MTRDataSummary dataSummary) {
-        Config config = Config.getInstance();
         if(areaBase instanceof Station station) {
             List<MTRDataSummary.BasicRouteInfo> routes = dataSummary.getRoutesInStation(station);
-            return !config.showStationWithNoRoute && (routes == null || routes.isEmpty());
+            return !MTRSurveyorConfig.INSTANCE.filter.showStationWithNoRoute.value() && (routes == null || routes.isEmpty());
         }
 
         return false;

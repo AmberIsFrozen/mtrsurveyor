@@ -24,7 +24,6 @@
     "fabricloader": ">=0.17",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
-
     "mtr": ">=${mtr_version}",
     "surveyor": ">=${surveyor_version}"
   }
