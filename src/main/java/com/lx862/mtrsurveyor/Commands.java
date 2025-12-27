@@ -74,15 +74,6 @@ public class Commands {
 
         LiteralArgumentBuilder<ServerCommandSource> configNode = CommandManager.literal("config");
 
-        LiteralArgumentBuilder<ServerCommandSource> reloadNode = CommandManager.literal("reload");
-        reloadNode.executes(ctx -> {
-//           Config.load();
-           ctx.getSource().sendFeedback(() -> Text.literal("Config reloaded!"), true);
-           return 1;
-        });
-
-
-
         LiteralArgumentBuilder<ServerCommandSource> autoSyncNode = createBoolConfigNode("autoSync", "Auto-sync landmarks", MTRSurveyorConfig.INSTANCE.enableAutoSync::value, MTRSurveyorConfig.INSTANCE.enableAutoSync::setValue);
         LiteralArgumentBuilder<ServerCommandSource> showStationWithNoRouteNode = createBoolConfigNode("showStationWithNoRoute", "Show empty station (No route)", MTRSurveyorConfig.INSTANCE.filter.showStationWithNoRoute::value, MTRSurveyorConfig.INSTANCE.filter.showStationWithNoRoute::setValue);
         LiteralArgumentBuilder<ServerCommandSource> showHiddenRouteNode = createBoolConfigNode("showHiddenRoute", "Show hidden route", MTRSurveyorConfig.INSTANCE.filter.showHiddenRoute::value, MTRSurveyorConfig.INSTANCE.filter.showHiddenRoute::setValue);
@@ -94,8 +85,6 @@ public class Commands {
         configNode.then(showHiddenRouteNode);
         configNode.then(addStationLandmarks);
         configNode.then(addDepotLandmarks);
-
-        configNode.then(reloadNode);
 
         rootNode.then(clearNode);
         rootNode.then(syncNode);

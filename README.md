@@ -17,18 +17,26 @@ This should work with **Sinytra Connector** on Forge/NeoForge, provided you have
 - Minecraft Transit Railway 4.x (Forge)
 - - Note: No need to run the Fabric version of MTR via connector, just use the Forge build!
 
-## Config
-The config file is located under `.minecraft/config/mtrsurveyor.toml`.
+## Configuring
+### McQoy (Client-only)
+For those who want a GUI config, this mod works with [McQoy](https://modrinth.com/mod/mcqoy) to provide a configuration screen with Mod Menu.  
+All changes will apply immediately after saving following the GUI.
 
-## Commands
+### In-Game Commands
+You can configure and perform landmarks-related actions with in-game commands (For OP 4 only)  
+Configuration change will apply instantly.
+
 - `/mtrsurveyor config addDepotLandmarks (false/true)` - Query or set whether depot landmarks should be added to the map.
 - `/mtrsurveyor config addStationLandmarks (false/true)` - Query or set whether station landmarks should be added to the map.
 - `/mtrsurveyor config autoSync (false/true)` - Query or set whether landmarks should be automatically created & synced when an MTR-related change occurs.
-- `/mtrsurveyor config reload` - Reload the config from `.minecraft/config/mtrsurveyor.json`.
 - `/mtrsurveyor config showHiddenRoute (false/true)` - Query or set whether hidden routes in MTR should be appended to the station description.
 - `/mtrsurveyor config showStationWithNoRoute (false/true)` - Query or set whether empty stations (i.e. with no routes) should be added to the map.
 - `/mtrsurveyor clearLandmarks <world id>` - Clear all landmarks for the specified world (Note: Landmarks will appear again when MTR stations/depots changed if auto sync is enabled, see above to disable)
 - `/mtrsurveyor syncLandmarks <world id>` - Sync & update all landmarks for the specified world
+
+### Manual (TOML Editing)
+The config file is located under `.minecraft/config/mtrsurveyor.toml`.  
+You would have to restart your game afterwords for the changes to apply
 
 ## License
 This project is licensed under the MIT License.
