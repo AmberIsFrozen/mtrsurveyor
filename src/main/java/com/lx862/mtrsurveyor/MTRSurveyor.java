@@ -19,8 +19,13 @@ public class MTRSurveyor implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        LOGGER.info("[{}] You get a landmark, you get a landmark, every-nyan gets a landmark! >w<", MOD_NAME);
         MTRSurveyorConfig.init();
+
+        if(MTRSurveyorConfig.INSTANCE.formalInitLog.value()) {
+            LOGGER.info("[{}] Mod loaded!", MOD_NAME);
+        } else {
+            LOGGER.info("[{}] You get a landmark, you get a landmark, every-nyan gets a landmark! >w<", MOD_NAME);
+        }
 
         ServerLifecycleEvents.SERVER_STARTING.register(minecraftServer -> {
             serverInstance = minecraftServer;

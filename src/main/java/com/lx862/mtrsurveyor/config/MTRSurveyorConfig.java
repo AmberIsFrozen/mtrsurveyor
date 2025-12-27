@@ -11,6 +11,9 @@ public class MTRSurveyorConfig extends ReflectiveConfig {
     private static final Path configDirectory = FabricLoader.getInstance().getConfigDir();
     public static final MTRSurveyorConfig INSTANCE = MTRSurveyorConfig.createToml(configDirectory, "", "mtrsurveyor", MTRSurveyorConfig.class);
 
+    @Comment("Change the mod initialization log message to be something more formal... if that's not your thing :>")
+    public final TrackedValue<Boolean> formalInitLog = this.value(false);
+
     @Comment("Whether landmarks should be automatically created & synced when an MTR-related change occurs.")
     public final TrackedValue<Boolean> enableAutoSync = this.value(true);
 
