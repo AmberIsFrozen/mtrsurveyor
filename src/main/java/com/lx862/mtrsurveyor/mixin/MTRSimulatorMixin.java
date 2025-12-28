@@ -22,7 +22,7 @@ public class MTRSimulatorMixin extends Data {
     @Override
     public void sync() {
         super.sync();
-        if(MTRSurveyorConfig.INSTANCE.enableAutoSync.value()) {
+        if(MTRSurveyorConfig.INSTANCE.enabled.value()) {
             // dimension is in format e.g. minecraft/overworld
             String[] dimSplit = dimension.split("/");
             String dimensionNamespace = dimSplit[0];

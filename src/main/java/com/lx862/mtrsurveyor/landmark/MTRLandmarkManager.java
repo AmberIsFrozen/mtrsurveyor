@@ -27,7 +27,7 @@ public class MTRLandmarkManager {
         WorldLandmarks landmarks = worldSummary.landmarks();
         if(landmarks == null) return;
 
-        MTRSurveyor.LOGGER.info("[{}] Syncing landmarks", MTRSurveyor.MOD_NAME);
+        MTRSurveyor.LOGGER.info("[{}] Syncing landmarks for world {}", MTRSurveyor.MOD_NAME, world.getRegistryKey().getValue());
         Long2ObjectOpenHashMap<AreaBase<?, ?>> mtrAreas = new Long2ObjectOpenHashMap<>();
 
         Map<UUID, Map<Identifier, Landmark>> changed = landmarks.removeAllForBatch(new HashMap<>(), landmark -> {
@@ -35,23 +35,25 @@ public class MTRLandmarkManager {
             return landmarkId.getNamespace().equals(MTRSurveyor.MOD_ID);
         });
 
-        if(MTRSurveyorConfig.INSTANCE.addStationLandmarks.value()) {
-            for(AreaBase<?, ?> area : new ArrayList<>(dataSummary.getData().stations)) {
-                mtrAreas.put(area.getId(), area);
+        if(MTRSurveyorConfig.INSTANCE.enabled.value()) {
+            if(MTRSurveyorConfig.INSTANCE.filter.showStationLandmarks.value()) {
+                for(AreaBase<?, ?> area : new ArrayList<>(dataSummary.getData().stations)) {
+                    mtrAreas.put(area.getId(), area);
+                }
             }
-        }
 
-        if(MTRSurveyorConfig.INSTANCE.addDepotLandmarks.value()) {
-            for(AreaBase<?, ?> area : new ArrayList<>(dataSummary.getData().depots)) {
-                mtrAreas.put(area.getId(), area);
+            if(MTRSurveyorConfig.INSTANCE.filter.showDepotLandmarks.value()) {
+                for(AreaBase<?, ?> area : new ArrayList<>(dataSummary.getData().depots)) {
+                    mtrAreas.put(area.getId(), area);
+                }
             }
-        }
 
-        for(AreaBase<?, ?> area : mtrAreas.values()) {
-            if(shouldBeFilteredOut(area, dataSummary)) continue;
+            for(AreaBase<?, ?> area : mtrAreas.values()) {
+                if(shouldBeFilteredOut(area, dataSummary)) continue;
 
-            Landmark landmark = createLandmark(area, dataSummary);
-            landmarks.putForBatch(changed, landmark);
+                Landmark landmark = createLandmark(area, dataSummary);
+                landmarks.putForBatch(changed, landmark);
+            }
         }
 
         landmarks.handleChanged(world, changed, world.isClient(), null);
@@ -120,7 +122,7 @@ public class MTRLandmarkManager {
     private static boolean shouldBeFilteredOut(AreaBase<?, ?> areaBase, MTRDataSummary dataSummary) {
         if(areaBase instanceof Station station) {
             List<MTRDataSummary.BasicRouteInfo> routes = dataSummary.getRoutesInStation(station);
-            return !MTRSurveyorConfig.INSTANCE.filter.showStationWithNoRoute.value() && (routes == null || routes.isEmpty());
+            return !MTRSurveyorConfig.INSTANCE.filter.showEmptyStation.value() && (routes == null || routes.isEmpty());
         }
 
         return false;

@@ -4,15 +4,17 @@ import com.lx862.mtrsurveyor.config.MTRSurveyorConfig;
 import com.lx862.mtrsurveyor.landmark.MTRLandmarkManager;
 import com.lx862.mtrsurveyor.mixin.MTRAccessorMixin;
 import com.lx862.mtrsurveyor.mixin.MainAccessorMixin;
+import com.lx862.mtrsurveyor.util.MTRUtil;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.argument.DimensionArgumentType;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -28,43 +30,30 @@ public class Commands {
         LiteralArgumentBuilder<ServerCommandSource> rootNode = CommandManager.literal("mtrsurveyor");
         rootNode.requires(ctx -> ctx.hasPermissionLevel(4));
 
-        LiteralArgumentBuilder<ServerCommandSource> clearNode = CommandManager.literal("clearLandmarks");
-        clearNode.then(CommandManager.argument("dimension", DimensionArgumentType.dimension())
-            .executes(ctx -> {
-                    World world = DimensionArgumentType.getDimensionArgument(ctx, "dimension");
-                    MTRLandmarkManager.clearLandmarks(world);
-                    ctx.getSource().sendFeedback(() -> Text.literal("Cleared all MTR Surveyor landmarks!").formatted(Formatting.GREEN), true);
-
-                    if(MTRSurveyorConfig.INSTANCE.enableAutoSync.value()) {
-                        final String disableSyncCommand = "/mtrsurveyor config autoSync false";
-
-                        ctx.getSource().sendFeedback(() -> {
-                            Text cmdText = Text.literal("[here]")
-                                    .formatted(Formatting.YELLOW)
-                                    .formatted(Formatting.UNDERLINE)
-                                    .styled(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal(disableSyncCommand))))
-                                    .styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, disableSyncCommand)));
-                            return Text.literal("To prevent landmarks from showing up again, click ").append(cmdText).append(Text.literal(" to disable landmark syncing."));
-                        }, false);
-                    }
-
-                    return 1;
-                }
-            )
-        );
-
-        LiteralArgumentBuilder<ServerCommandSource> syncNode = CommandManager.literal("syncLandmarks");
-        syncNode.then(CommandManager.argument("dimension", DimensionArgumentType.dimension())
-            .executes(ctx -> {
-                    World world = DimensionArgumentType.getDimensionArgument(ctx, "dimension");
-                    Identifier worldId = world.getRegistryKey().getValue();
+        LiteralArgumentBuilder<ServerCommandSource> forceSyncNode = CommandManager.literal("syncLandmarks");
+        forceSyncNode
+                .executes(ctx -> {
+                    MinecraftServer minecraftServer = ctx.getSource().getServer();
                     Main main = MTRAccessorMixin.getMain();
                     for(Simulator simulator : ((MainAccessorMixin)main).getSimulators()) {
-                        boolean isOurWorld = simulator.dimension.equals(worldId.toString().replace(":", "/"));
-                        if(isOurWorld) {
+                        Identifier dimensionId = MTRUtil.dimensionToId(simulator.dimension);
+                        MTRDataSummary mtrDataSummary = new MTRDataSummary(simulator);
+                        MTRLandmarkManager.syncLandmarks(minecraftServer.getWorld(RegistryKey.of(RegistryKeys.WORLD, dimensionId)), mtrDataSummary);
+                        ctx.getSource().sendFeedback(() -> Text.literal("Synced MTR landmarks for dimension " + dimensionId + "!").formatted(Formatting.GREEN), true);
+                    }
+                    return 1;
+                })
+                .then(CommandManager.argument("dimension", DimensionArgumentType.dimension())
+            .executes(ctx -> {
+                    World targetWorld = DimensionArgumentType.getDimensionArgument(ctx, "dimension");
+                    Identifier targetWorldId = targetWorld.getRegistryKey().getValue();
+                    Main main = MTRAccessorMixin.getMain();
+                    for(Simulator simulator : ((MainAccessorMixin)main).getSimulators()) {
+                        Identifier dimensionId = MTRUtil.dimensionToId(simulator.dimension);
+                        if(targetWorldId.equals(dimensionId)) {
                             MTRDataSummary mtrDataSummary = new MTRDataSummary(simulator);
-                            MTRLandmarkManager.syncLandmarks(world, mtrDataSummary);
-                            ctx.getSource().sendFeedback(() -> Text.literal("Synced MTR landmarks for world " + worldId + "!").formatted(Formatting.GREEN), true);
+                            MTRLandmarkManager.syncLandmarks(targetWorld, mtrDataSummary);
+                            ctx.getSource().sendFeedback(() -> Text.literal("Synced MTR landmarks for dimension " + targetWorldId + "!").formatted(Formatting.GREEN), true);
                         }
                     }
                     return 1;
@@ -74,20 +63,19 @@ public class Commands {
 
         LiteralArgumentBuilder<ServerCommandSource> configNode = CommandManager.literal("config");
 
-        LiteralArgumentBuilder<ServerCommandSource> autoSyncNode = createBoolConfigNode("autoSync", "Auto-sync landmarks", MTRSurveyorConfig.INSTANCE.enableAutoSync::value, MTRSurveyorConfig.INSTANCE.enableAutoSync::setValue);
-        LiteralArgumentBuilder<ServerCommandSource> showStationWithNoRouteNode = createBoolConfigNode("showStationWithNoRoute", "Show empty station (No route)", MTRSurveyorConfig.INSTANCE.filter.showStationWithNoRoute::value, MTRSurveyorConfig.INSTANCE.filter.showStationWithNoRoute::setValue);
+        LiteralArgumentBuilder<ServerCommandSource> autoSyncNode = createBoolConfigNode("enabled", "Mod enabled", MTRSurveyorConfig.INSTANCE.enabled::value, MTRSurveyorConfig.INSTANCE.enabled::setValue);
+        LiteralArgumentBuilder<ServerCommandSource> showEmptyStationNode = createBoolConfigNode("showEmptyStation", "Show empty station (No route)", MTRSurveyorConfig.INSTANCE.filter.showEmptyStation::value, MTRSurveyorConfig.INSTANCE.filter.showEmptyStation::setValue);
         LiteralArgumentBuilder<ServerCommandSource> showHiddenRouteNode = createBoolConfigNode("showHiddenRoute", "Show hidden route", MTRSurveyorConfig.INSTANCE.filter.showHiddenRoute::value, MTRSurveyorConfig.INSTANCE.filter.showHiddenRoute::setValue);
-        LiteralArgumentBuilder<ServerCommandSource> addStationLandmarks = createBoolConfigNode("addStationLandmarks", "Show station landmarks", MTRSurveyorConfig.INSTANCE.addStationLandmarks::value, MTRSurveyorConfig.INSTANCE.addStationLandmarks::setValue);
-        LiteralArgumentBuilder<ServerCommandSource> addDepotLandmarks = createBoolConfigNode("addDepotLandmarks", "Show depot landmarks", MTRSurveyorConfig.INSTANCE.addDepotLandmarks::value, MTRSurveyorConfig.INSTANCE.addDepotLandmarks::setValue);
+        LiteralArgumentBuilder<ServerCommandSource> showStationLandmarksNode = createBoolConfigNode("showStationLandmarks", "Show station landmarks", MTRSurveyorConfig.INSTANCE.filter.showStationLandmarks::value, MTRSurveyorConfig.INSTANCE.filter.showStationLandmarks::setValue);
+        LiteralArgumentBuilder<ServerCommandSource> showDepotLandmarksNode = createBoolConfigNode("showDepotLandmarks", "Show depot landmarks", MTRSurveyorConfig.INSTANCE.filter.showDepotLandmarks::value, MTRSurveyorConfig.INSTANCE.filter.showDepotLandmarks::setValue);
 
         configNode.then(autoSyncNode);
-        configNode.then(showStationWithNoRouteNode);
+        configNode.then(showEmptyStationNode);
         configNode.then(showHiddenRouteNode);
-        configNode.then(addStationLandmarks);
-        configNode.then(addDepotLandmarks);
+        configNode.then(showStationLandmarksNode);
+        configNode.then(showDepotLandmarksNode);
 
-        rootNode.then(clearNode);
-        rootNode.then(syncNode);
+        rootNode.then(forceSyncNode);
         rootNode.then(configNode);
         dispatcher.register(rootNode);
     }

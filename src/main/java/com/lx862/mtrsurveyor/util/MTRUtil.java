@@ -1,12 +1,18 @@
 package com.lx862.mtrsurveyor.util;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import org.mtr.core.data.TransportMode;
 import org.mtr.mod.Items;
 
 import java.util.Locale;
 
 public class MTRUtil {
+    public static Identifier dimensionToId(String dim) {
+        // MTR uses / as the separator
+        return new Identifier(dim.replace("/", ":"));
+    }
+
     public static String getTransportModeName(TransportMode transportMode) {
         String str = transportMode.toString();
         return str.toLowerCase(Locale.ROOT);
