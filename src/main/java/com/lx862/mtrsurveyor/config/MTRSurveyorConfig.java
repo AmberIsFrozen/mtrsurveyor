@@ -33,9 +33,9 @@ public class MTRSurveyorConfig extends ReflectiveConfig {
     public final TrackedValue<Boolean> enabled = this.value(true);
 
     @Comment("Configuration related to visibility of area landmarks")
-    public final Filter filter = new Filter();
+    public final Visibility visibility = new Visibility();
 
-    public static class Filter extends Section {
+    public static class Visibility extends Section {
         @Comment("Whether station landmarks should be added to the map.")
         public final TrackedValue<Boolean> showStationLandmarks = this.value(true);
 
@@ -45,7 +45,7 @@ public class MTRSurveyorConfig extends ReflectiveConfig {
         @Comment("Whether empty stations (i.e. with no routes) should be added to the map.")
         public final TrackedValue<Boolean> showEmptyStation = this.value(false);
 
-        @Comment("Whether hidden routes in MTR should be appended to the station description.")
+        @Comment("Whether MTR route marked as hidden should be appended to the station description.")
         public final TrackedValue<Boolean> showHiddenRoute = this.value(false);
     }
 

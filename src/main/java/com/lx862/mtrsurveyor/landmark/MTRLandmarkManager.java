@@ -36,13 +36,13 @@ public class MTRLandmarkManager {
         });
 
         if(MTRSurveyorConfig.INSTANCE.enabled.value()) {
-            if(MTRSurveyorConfig.INSTANCE.filter.showStationLandmarks.value()) {
+            if(MTRSurveyorConfig.INSTANCE.visibility.showStationLandmarks.value()) {
                 for(AreaBase<?, ?> area : new ArrayList<>(dataSummary.getData().stations)) {
                     mtrAreas.put(area.getId(), area);
                 }
             }
 
-            if(MTRSurveyorConfig.INSTANCE.filter.showDepotLandmarks.value()) {
+            if(MTRSurveyorConfig.INSTANCE.visibility.showDepotLandmarks.value()) {
                 for(AreaBase<?, ?> area : new ArrayList<>(dataSummary.getData().depots)) {
                     mtrAreas.put(area.getId(), area);
                 }
@@ -122,7 +122,7 @@ public class MTRLandmarkManager {
     private static boolean shouldBeFilteredOut(AreaBase<?, ?> areaBase, MTRDataSummary dataSummary) {
         if(areaBase instanceof Station station) {
             List<MTRDataSummary.BasicRouteInfo> routes = dataSummary.getRoutesInStation(station);
-            return !MTRSurveyorConfig.INSTANCE.filter.showEmptyStation.value() && (routes == null || routes.isEmpty());
+            return !MTRSurveyorConfig.INSTANCE.visibility.showEmptyStation.value() && (routes == null || routes.isEmpty());
         }
 
         return false;

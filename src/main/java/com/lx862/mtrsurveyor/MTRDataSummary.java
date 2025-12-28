@@ -31,7 +31,7 @@ public class MTRDataSummary {
             for(Route route : routePassing) {
                 BasicRouteInfo basicRouteInfo = new BasicRouteInfo(route.getName().split("\\|\\|")[0], route.getColor());
                 if(basicRouteInfos.contains(basicRouteInfo)) continue;
-                if(!MTRSurveyorConfig.INSTANCE.filter.showHiddenRoute.value() && route.getHidden()) continue;
+                if(!MTRSurveyorConfig.INSTANCE.visibility.showHiddenRoute.value() && route.getHidden()) continue;
                 basicRouteInfos.add(basicRouteInfo);
             }
 
