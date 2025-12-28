@@ -9,7 +9,7 @@ Required on **server-side**, installable on **client-side** icon for custom Item
 ![A Minecraft map displayed in Hoofprint, a minecraft map mod, along with MTR stations/depots landmarks/markers](./assets/preview.png)
 
 ## Sinytra Connector Compatibility
-![A fox emoji saying yes!](./assets/sinytra_yes.png)
+![An emoji saying yes!](./assets/sinytra_yes.png)
 
 This should work with **Sinytra Connector** on Forge/NeoForge, provided you have the following mods installed:
 - Sinytra Connector
