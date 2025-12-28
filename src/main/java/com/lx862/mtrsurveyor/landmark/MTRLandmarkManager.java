@@ -83,7 +83,7 @@ public class MTRLandmarkManager {
     private static Landmark createStationLandmark(Station station, MTRDataSummary mtrDataSummary) {
         List<MTRDataSummary.BasicRouteInfo> routesInStation = mtrDataSummary.getRoutesInStation(station);
 
-        return Landmark.create(WorldLandmarks.GLOBAL, MTRSurveyor.id("stations/" + station.getHexId().toLowerCase()), builder -> {
+        return Landmark.create(WorldLandmarks.GLOBAL, MTRSurveyor.id(MTRUtil.getTransportModeName(station.getTransportMode()) + "_station/" + station.getHexId().toLowerCase()), builder -> {
             fillLandmarkComponent(station, builder);
 
             List<Text> lores = new ArrayList<>();
@@ -103,7 +103,7 @@ public class MTRLandmarkManager {
     }
 
     private static Landmark createDepotLandmark(Depot depot, MTRDataSummary mtrDataSummary) {
-        return Landmark.create(WorldLandmarks.GLOBAL, MTRSurveyor.id("depots/" + depot.getHexId().toLowerCase()), builder -> {
+        return Landmark.create(WorldLandmarks.GLOBAL, MTRSurveyor.id(MTRUtil.getTransportModeName(depot.getTransportMode()) + "_depot/" + depot.getHexId().toLowerCase()), builder -> {
             fillLandmarkComponent(depot, builder);
             builder.add(LandmarkComponentTypes.NAME, Text.literal(IGui.formatStationName(depot.getName())));
             return builder;

@@ -4,7 +4,14 @@ import net.minecraft.item.ItemStack;
 import org.mtr.core.data.TransportMode;
 import org.mtr.mod.Items;
 
+import java.util.Locale;
+
 public class MTRUtil {
+    public static String getTransportModeName(TransportMode transportMode) {
+        String str = transportMode.toString();
+        return str.toLowerCase(Locale.ROOT);
+    }
+
     public static ItemStack getItemStackForTransportMode(TransportMode transportMode, boolean isDepot) {
         final ItemStack stack;
         switch(transportMode) {
