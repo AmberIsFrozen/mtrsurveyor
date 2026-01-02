@@ -1,5 +1,8 @@
 package com.lx862.mtrsurveyor.landmark;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+import com.google.common.collect.Tables;
 import com.lx862.mtrsurveyor.*;
 import com.lx862.mtrsurveyor.config.MTRSurveyorConfig;
 import com.lx862.mtrsurveyor.util.MTRUtil;
@@ -30,7 +33,7 @@ public class MTRLandmarkManager {
         MTRSurveyor.LOGGER.info("[{}] Syncing landmarks for world {}", MTRSurveyor.MOD_NAME, world.getRegistryKey().getValue());
         Long2ObjectOpenHashMap<AreaBase<?, ?>> mtrAreas = new Long2ObjectOpenHashMap<>();
 
-        Map<UUID, Map<Identifier, Landmark>> changed = landmarks.removeAllForBatch(new HashMap<>(), landmark -> {
+        Table<UUID, Identifier, Landmark> changed = landmarks.removeAllForBatch(Tables.synchronizedTable(HashBasedTable.create()), landmark -> {
             Identifier landmarkId = landmark.id();
             return landmarkId.getNamespace().equals(MTRSurveyor.MOD_ID);
         });
@@ -56,7 +59,7 @@ public class MTRLandmarkManager {
             }
         }
 
-        landmarks.handleChanged(world, changed, world.isClient(), null);
+        landmarks.handleChanged(changed, world.isClient(), null);
         MTRSurveyor.LOGGER.debug("[{}] Took {}ms to sync.", MTRSurveyor.MOD_NAME, (System.currentTimeMillis() - startMs));
     }
 
@@ -67,7 +70,7 @@ public class MTRLandmarkManager {
 
         MTRSurveyor.LOGGER.info("[{}] Clearing landmarks for {}", MTRSurveyor.MOD_NAME, world.getRegistryKey().getValue().toString());
 
-        landmarks.removeAll(world, landmark -> {
+        landmarks.removeAll(landmark -> {
             Identifier landmarkId = landmark.id();
             return landmarkId.getNamespace().equals(MTRSurveyor.MOD_ID);
         });
