@@ -29,6 +29,9 @@ public class MTRSurveyorConfig extends ReflectiveConfig {
     @Comment("Change the mod initialization log message to be something more formal... if that's not your thing :>")
     public final TrackedValue<Boolean> formalInitLog = this.value(false);
 
+    @Comment("Log all landmark sync events to the console.")
+    public final TrackedValue<Boolean> debugLog = this.value(false);
+
     @Comment("Whether landmarks should be automatically created & synced when an MTR-related change occurs.")
     public final TrackedValue<Boolean> enabled = this.value(true);
 
@@ -55,13 +58,14 @@ public class MTRSurveyorConfig extends ReflectiveConfig {
 
     public void syncLandmarks(Config.Builder builder) {
         builder.callback(newConfig -> {
+            MTRLandmarkManager.SyncOrigin syncOrigin = MTRLandmarkManager.SyncOrigin.ofServer("Config changed");
             MinecraftServer mcServer = MTRSurveyor.getServerInstance();
             if(mcServer != null && mcServer.isRunning()) {
                 Main main = MTRAccessorMixin.getMain();
                 for(Simulator simulator : ((MainAccessorMixin)main).getSimulators()) {
                     World world = mcServer.getWorld(RegistryKey.of(RegistryKeys.WORLD, MTRUtil.dimensionToId(simulator.dimension)));
-                    MTRDataSummary mtrDataSummary = new MTRDataSummary(simulator);
-                    MTRLandmarkManager.syncLandmarks(world, mtrDataSummary);
+                    MTRDataSummary mtrDataSummary = MTRDataSummary.of(simulator);
+                    MTRLandmarkManager.syncLandmarks(syncOrigin, world, mtrDataSummary, MTRSurveyorConfig.INSTANCE);
                 }
             }
         });

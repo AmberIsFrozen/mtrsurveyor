@@ -6,7 +6,6 @@ import com.google.common.collect.Tables;
 import com.lx862.mtrsurveyor.*;
 import com.lx862.mtrsurveyor.config.MTRSurveyorConfig;
 import com.lx862.mtrsurveyor.util.MTRUtil;
-import folk.sisby.surveyor.WorldSummary;
 import folk.sisby.surveyor.landmark.Landmark;
 import folk.sisby.surveyor.landmark.WorldLandmarks;
 import folk.sisby.surveyor.landmark.component.LandmarkComponentMap;
@@ -24,35 +23,33 @@ import java.util.*;
 
 public class MTRLandmarkManager {
 
-    public static void syncLandmarks(World world, MTRDataSummary dataSummary) {
-        long startMs = System.currentTimeMillis();
-        WorldSummary worldSummary = WorldSummary.of(world);
-        WorldLandmarks landmarks = worldSummary.landmarks();
+    public static void syncLandmarks(SyncOrigin syncOrigin, World world, MTRDataSummary dataSummary, MTRSurveyorConfig config) {
+        WorldLandmarks landmarks = WorldLandmarks.of(world);
         if(landmarks == null) return;
+        long startMs = System.currentTimeMillis();
 
-        MTRSurveyor.LOGGER.info("[{}] Syncing landmarks for world {}", MTRSurveyor.MOD_NAME, world.getRegistryKey().getValue());
+        if(config.debugLog.value()) {
+            MTRSurveyor.LOGGER.info("[{}] Syncing {} landmarks for world {} ({})", MTRSurveyor.MOD_NAME, syncOrigin.sourceName(), world.getRegistryKey().getValue(), syncOrigin.reason());
+        }
         Long2ObjectOpenHashMap<AreaBase<?, ?>> mtrAreas = new Long2ObjectOpenHashMap<>();
 
-        Table<UUID, Identifier, Landmark> changed = landmarks.removeAllForBatch(Tables.synchronizedTable(HashBasedTable.create()), landmark -> {
-            Identifier landmarkId = landmark.id();
-            return landmarkId.getNamespace().equals(MTRSurveyor.MOD_ID);
-        });
+        Table<UUID, Identifier, Landmark> changed = landmarks.removeAllForBatch(Tables.synchronizedTable(HashBasedTable.create()), landmark -> landmark.id().getNamespace().equals(MTRSurveyor.MOD_ID));
 
-        if(MTRSurveyorConfig.INSTANCE.enabled.value()) {
-            if(MTRSurveyorConfig.INSTANCE.visibility.showStationLandmarks.value()) {
+        if(config.enabled.value()) {
+            if(config.visibility.showStationLandmarks.value()) {
                 for(AreaBase<?, ?> area : new ArrayList<>(dataSummary.getData().stations)) {
                     mtrAreas.put(area.getId(), area);
                 }
             }
 
-            if(MTRSurveyorConfig.INSTANCE.visibility.showDepotLandmarks.value()) {
+            if(config.visibility.showDepotLandmarks.value()) {
                 for(AreaBase<?, ?> area : new ArrayList<>(dataSummary.getData().depots)) {
                     mtrAreas.put(area.getId(), area);
                 }
             }
 
             for(AreaBase<?, ?> area : mtrAreas.values()) {
-                if(shouldBeFilteredOut(area, dataSummary)) continue;
+                if(shouldBeFilteredOut(area, dataSummary, config.visibility.showEmptyStation.value())) continue;
 
                 Landmark landmark = createLandmark(area, dataSummary);
                 landmarks.putForBatch(changed, landmark);
@@ -60,7 +57,10 @@ public class MTRLandmarkManager {
         }
 
         landmarks.handleChanged(changed, world.isClient(), null);
-        MTRSurveyor.LOGGER.debug("[{}] Took {}ms to sync.", MTRSurveyor.MOD_NAME, (System.currentTimeMillis() - startMs));
+
+        if(config.debugLog.value()) {
+            MTRSurveyor.LOGGER.info("[{}] Took {}ms to sync.", MTRSurveyor.MOD_NAME, (System.currentTimeMillis() - startMs));
+        }
     }
 
     private static Landmark createLandmark(AreaBase<?, ?> areaBase, MTRDataSummary mtrDataSummary) {
@@ -109,12 +109,22 @@ public class MTRLandmarkManager {
         builder.add(LandmarkComponentTypes.STACK, MTRUtil.getItemStackForTransportMode(areaBase.getTransportMode(), areaBase instanceof Depot));
     }
 
-    private static boolean shouldBeFilteredOut(AreaBase<?, ?> areaBase, MTRDataSummary dataSummary) {
+    private static boolean shouldBeFilteredOut(AreaBase<?, ?> areaBase, MTRDataSummary dataSummary, boolean showEmptyStation) {
         if(areaBase instanceof Station station) {
             List<MTRDataSummary.BasicRouteInfo> routes = dataSummary.getRoutesInStation(station);
-            return !MTRSurveyorConfig.INSTANCE.visibility.showEmptyStation.value() && (routes == null || routes.isEmpty());
+            return !showEmptyStation && (routes == null || routes.isEmpty());
         }
 
         return false;
+    }
+
+    public record SyncOrigin(String sourceName, String reason) {
+        public static SyncOrigin ofServer(String reason) {
+            return new SyncOrigin("server", reason);
+        }
+
+        public static SyncOrigin ofClient(String reason) {
+            return new SyncOrigin("client", reason);
+        }
     }
 }

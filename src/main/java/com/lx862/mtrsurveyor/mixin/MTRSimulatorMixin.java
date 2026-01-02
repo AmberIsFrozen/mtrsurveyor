@@ -23,16 +23,17 @@ public class MTRSimulatorMixin extends Data {
     public void sync() {
         super.sync();
         if(MTRSurveyorConfig.INSTANCE.enabled.value()) {
+            MTRLandmarkManager.SyncOrigin syncOrigin = MTRLandmarkManager.SyncOrigin.ofServer("MTR Data Changed");
             // dimension is in format e.g. minecraft/overworld
             String[] dimSplit = dimension.split("/");
             String dimensionNamespace = dimSplit[0];
             String dimensionPath = dimSplit[1];
             Identifier dimensionId = Identifier.of(dimensionNamespace, dimensionPath);
             MinecraftServer server = MTRSurveyor.getServerInstance();
-            MTRDataSummary dataSummary = new MTRDataSummary(this);
+            MTRDataSummary dataSummary = MTRDataSummary.of(this);
             server.execute(() -> {
                 World world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, dimensionId));
-                MTRLandmarkManager.syncLandmarks(world, dataSummary);
+                MTRLandmarkManager.syncLandmarks(syncOrigin, world, dataSummary, MTRSurveyorConfig.INSTANCE);
             });
         }
     }

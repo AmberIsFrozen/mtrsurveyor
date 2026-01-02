@@ -33,26 +33,30 @@ public class Commands {
         LiteralArgumentBuilder<ServerCommandSource> forceSyncNode = CommandManager.literal("syncLandmarks");
         forceSyncNode
                 .executes(ctx -> {
+                    MTRLandmarkManager.SyncOrigin syncOrigin = MTRLandmarkManager.SyncOrigin.ofServer("Player initiated sync");
                     MinecraftServer minecraftServer = ctx.getSource().getServer();
                     Main main = MTRAccessorMixin.getMain();
+
                     for(Simulator simulator : ((MainAccessorMixin)main).getSimulators()) {
                         Identifier dimensionId = MTRUtil.dimensionToId(simulator.dimension);
-                        MTRDataSummary mtrDataSummary = new MTRDataSummary(simulator);
-                        MTRLandmarkManager.syncLandmarks(minecraftServer.getWorld(RegistryKey.of(RegistryKeys.WORLD, dimensionId)), mtrDataSummary);
+                        MTRDataSummary mtrDataSummary = MTRDataSummary.of(simulator);
+                        MTRLandmarkManager.syncLandmarks(syncOrigin, minecraftServer.getWorld(RegistryKey.of(RegistryKeys.WORLD, dimensionId)), mtrDataSummary, MTRSurveyorConfig.INSTANCE);
                         ctx.getSource().sendFeedback(() -> Text.literal("Synced MTR landmarks for dimension " + dimensionId + "!").formatted(Formatting.GREEN), true);
                     }
                     return 1;
                 })
                 .then(CommandManager.argument("dimension", DimensionArgumentType.dimension())
             .executes(ctx -> {
+                    MTRLandmarkManager.SyncOrigin syncOrigin = MTRLandmarkManager.SyncOrigin.ofServer("Player initiated sync");
                     World targetWorld = DimensionArgumentType.getDimensionArgument(ctx, "dimension");
                     Identifier targetWorldId = targetWorld.getRegistryKey().getValue();
                     Main main = MTRAccessorMixin.getMain();
+
                     for(Simulator simulator : ((MainAccessorMixin)main).getSimulators()) {
                         Identifier dimensionId = MTRUtil.dimensionToId(simulator.dimension);
                         if(targetWorldId.equals(dimensionId)) {
-                            MTRDataSummary mtrDataSummary = new MTRDataSummary(simulator);
-                            MTRLandmarkManager.syncLandmarks(targetWorld, mtrDataSummary);
+                            MTRDataSummary mtrDataSummary = MTRDataSummary.of(simulator);
+                            MTRLandmarkManager.syncLandmarks(syncOrigin, targetWorld, mtrDataSummary, MTRSurveyorConfig.INSTANCE);
                             ctx.getSource().sendFeedback(() -> Text.literal("Synced MTR landmarks for dimension " + targetWorldId + "!").formatted(Formatting.GREEN), true);
                         }
                     }
@@ -64,12 +68,14 @@ public class Commands {
         LiteralArgumentBuilder<ServerCommandSource> configNode = CommandManager.literal("config");
 
         LiteralArgumentBuilder<ServerCommandSource> autoSyncNode = createBoolConfigNode("enabled", "Mod enabled", MTRSurveyorConfig.INSTANCE.enabled::value, MTRSurveyorConfig.INSTANCE.enabled::setValue);
+        LiteralArgumentBuilder<ServerCommandSource> debugLogNode = createBoolConfigNode("debugLog", "Show debug log", MTRSurveyorConfig.INSTANCE.debugLog::value, MTRSurveyorConfig.INSTANCE.debugLog::setValue);
         LiteralArgumentBuilder<ServerCommandSource> showEmptyStationNode = createBoolConfigNode("showEmptyStation", "Show empty station (No route)", MTRSurveyorConfig.INSTANCE.visibility.showEmptyStation::value, MTRSurveyorConfig.INSTANCE.visibility.showEmptyStation::setValue);
         LiteralArgumentBuilder<ServerCommandSource> showHiddenRouteNode = createBoolConfigNode("showHiddenRoute", "Show hidden route", MTRSurveyorConfig.INSTANCE.visibility.showHiddenRoute::value, MTRSurveyorConfig.INSTANCE.visibility.showHiddenRoute::setValue);
         LiteralArgumentBuilder<ServerCommandSource> showStationLandmarksNode = createBoolConfigNode("showStationLandmarks", "Show station landmarks", MTRSurveyorConfig.INSTANCE.visibility.showStationLandmarks::value, MTRSurveyorConfig.INSTANCE.visibility.showStationLandmarks::setValue);
         LiteralArgumentBuilder<ServerCommandSource> showDepotLandmarksNode = createBoolConfigNode("showDepotLandmarks", "Show depot landmarks", MTRSurveyorConfig.INSTANCE.visibility.showDepotLandmarks::value, MTRSurveyorConfig.INSTANCE.visibility.showDepotLandmarks::setValue);
 
         configNode.then(autoSyncNode);
+        configNode.then(debugLogNode);
         configNode.then(showEmptyStationNode);
         configNode.then(showHiddenRouteNode);
         configNode.then(showStationLandmarksNode);
