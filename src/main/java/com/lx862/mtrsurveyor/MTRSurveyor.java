@@ -1,6 +1,7 @@
 package com.lx862.mtrsurveyor;
 
 import com.lx862.mtrsurveyor.config.MTRSurveyorConfig;
+import folk.sisby.surveyor.WorldSummary;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -20,6 +21,7 @@ public class MTRSurveyor implements ModInitializer {
     @Override
     public void onInitialize() {
         MTRSurveyorConfig.init();
+        WorldSummary.enableLandmarks();
 
         if(MTRSurveyorConfig.INSTANCE.formalInitLog.value()) {
             LOGGER.info("[{}] Mod loaded!", MOD_NAME);
