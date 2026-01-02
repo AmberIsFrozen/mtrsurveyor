@@ -63,19 +63,6 @@ public class MTRLandmarkManager {
         MTRSurveyor.LOGGER.debug("[{}] Took {}ms to sync.", MTRSurveyor.MOD_NAME, (System.currentTimeMillis() - startMs));
     }
 
-    public static void clearLandmarks(World world) {
-        WorldSummary worldSummary = WorldSummary.of(world);
-        WorldLandmarks landmarks = worldSummary.landmarks();
-        if(landmarks == null) return;
-
-        MTRSurveyor.LOGGER.info("[{}] Clearing landmarks for {}", MTRSurveyor.MOD_NAME, world.getRegistryKey().getValue().toString());
-
-        landmarks.removeAll(landmark -> {
-            Identifier landmarkId = landmark.id();
-            return landmarkId.getNamespace().equals(MTRSurveyor.MOD_ID);
-        });
-    }
-
     private static Landmark createLandmark(AreaBase<?, ?> areaBase, MTRDataSummary mtrDataSummary) {
         if(areaBase instanceof Station station) {
             return createStationLandmark(station, mtrDataSummary);
