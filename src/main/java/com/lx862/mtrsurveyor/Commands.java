@@ -65,24 +65,7 @@ public class Commands {
             )
         );
 
-        LiteralArgumentBuilder<ServerCommandSource> configNode = CommandManager.literal("config");
-
-        LiteralArgumentBuilder<ServerCommandSource> autoSyncNode = createBoolConfigNode("enabled", "Mod enabled", MTRSurveyorConfig.INSTANCE.enabled::value, MTRSurveyorConfig.INSTANCE.enabled::setValue);
-        LiteralArgumentBuilder<ServerCommandSource> debugLogNode = createBoolConfigNode("debugLog", "Show debug log", MTRSurveyorConfig.INSTANCE.debugLog::value, MTRSurveyorConfig.INSTANCE.debugLog::setValue);
-        LiteralArgumentBuilder<ServerCommandSource> showEmptyStationNode = createBoolConfigNode("showEmptyStation", "Show empty station (No route)", MTRSurveyorConfig.INSTANCE.visibility.showEmptyStation::value, MTRSurveyorConfig.INSTANCE.visibility.showEmptyStation::setValue);
-        LiteralArgumentBuilder<ServerCommandSource> showHiddenRouteNode = createBoolConfigNode("showHiddenRoute", "Show hidden route", MTRSurveyorConfig.INSTANCE.visibility.showHiddenRoute::value, MTRSurveyorConfig.INSTANCE.visibility.showHiddenRoute::setValue);
-        LiteralArgumentBuilder<ServerCommandSource> showStationLandmarksNode = createBoolConfigNode("showStationLandmarks", "Show station landmarks", MTRSurveyorConfig.INSTANCE.visibility.showStationLandmarks::value, MTRSurveyorConfig.INSTANCE.visibility.showStationLandmarks::setValue);
-        LiteralArgumentBuilder<ServerCommandSource> showDepotLandmarksNode = createBoolConfigNode("showDepotLandmarks", "Show depot landmarks", MTRSurveyorConfig.INSTANCE.visibility.showDepotLandmarks::value, MTRSurveyorConfig.INSTANCE.visibility.showDepotLandmarks::setValue);
-
-        configNode.then(autoSyncNode);
-        configNode.then(debugLogNode);
-        configNode.then(showEmptyStationNode);
-        configNode.then(showHiddenRouteNode);
-        configNode.then(showStationLandmarksNode);
-        configNode.then(showDepotLandmarksNode);
-
         rootNode.then(forceSyncNode);
-        rootNode.then(configNode);
         dispatcher.register(rootNode);
     }
 
